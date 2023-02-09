@@ -9,7 +9,7 @@ from statistics import mean
 
 def readFile(fname):
     if (os.path.exists(fname)):
-        return open(fname).read()
+        return open(fname, mode="r", encoding="utf-8").read()
     return ""
 
 
@@ -199,17 +199,44 @@ def task_3():
     except:
         subtaskFail()
 
-    initSubtask("Hatékony keresés", 2)
+    initSubtask("Gyors futásidő", 2)
     try:
         code = readFile("03_feladat.py")
         lines = code.split('\n')
-        lines[0] = 'nevek = ["David"] + ["John"] * 99999'
+        lines[0] = 'nevek = ["David"] + ["John"] * 999999'
         code = '\n'.join(lines)
+        start = time.time()
         runCode(code)
-        print(state["out"])
-        assertStringOut("Benne van")
+        end = time.time()
+        if (end - start) > 0.1:
+            subtaskFail()
+        else:
+            subtaskSuccess()
     except Exception as e:
         print(e)
+        subtaskFail()
+
+
+def task_4():
+    initNextTask(5)
+
+    initSubtask("Helyes fájlnév", 1)
+    assertCorrectFileName("03_feladat.py")
+
+    initSubtask("Törpe megtalálása", 2)
+    try:
+        with patch('builtins.input', return_value="Kuka"):
+            runFile("04_feladat.py")
+        assertStringOut("Talált!")
+    except:
+        subtaskFail()
+
+    initSubtask("Rossz találat jelzése", 2)
+    try:
+        with patch('builtins.input', return_value="Huba"):
+            runFile("04_feladat.py")
+        assertStringOut("Nem talált!")
+    except:
         subtaskFail()
 
 
@@ -219,6 +246,9 @@ task_2()
 printTaskSummary()
 task_3()
 printTaskSummary()
+task_4()
+printTaskSummary()
+
 
 # Summary
 printTitle("Összegzés:")
