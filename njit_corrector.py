@@ -2,18 +2,56 @@ import io
 import os
 from contextlib import redirect_stdout
 from unittest.mock import patch
+from contextlib import contextmanager
 
-state = {
-    "out": "",
-    "taskName": "",
-    "taskCount": 0,
-    "subtaskName": "",
-    "valueTask": 0,
-    "valueSubtask": 0,
-    "scoreTask": 0,
-    "score": 0,
-    "scoreMax": 0
-}
+
+state = None
+
+
+@contextmanager
+def exam():
+    try:
+        state = {
+            "out": "",
+            "taskName": "",
+            "taskCount": 0,
+            "subtaskName": "",
+            "valueTask": 0,
+            "valueSubtask": 0,
+            "scoreTask": 0,
+            "score": 0,
+            "scoreMax": 0
+        }
+        yield
+
+    except Exception as e:
+        raise e
+
+    finally:
+        printSummary()
+
+
+@contextmanager
+def task():
+    try:
+        initNextTask()
+        yield
+
+    except Exception as e:
+        raise e
+
+    finally:
+        closeTask()
+
+
+@contextmanager
+def subtask(name, value):
+    try:
+        initSubtask(name, value)
+        yield
+
+    except Exception as e:
+        catchError(e)
 
 
 class PyCorrector:
@@ -78,11 +116,13 @@ def printFail(text):
 
 
 def printSummary():
+    printTitle("Összegzés:")
     print(f"Pontok:{state['score']}/{state['scoreMax']}")
     print(f"Eredmény:{int((state['score'] / state['scoreMax']) * 100)}%")
 
 
 state = {
+    "debug": False,
     "out": "",
     "taskName": "",
     "taskCount": 0,
@@ -95,20 +135,26 @@ state = {
 }
 
 
-def initNextTask(value):
+def initNextTask():
     global state
     state["taskCount"] = int(state["taskCount"] + 1)
     state["taskName"] = f'{state["taskCount"]}. Feladat'
-    state["valueTask"] = value
+    state["valueTask"] = 0
     state["scoreTask"] = 0
-    state["scoreMax"] += state["valueTask"]
-    printTitle(f"{state['taskName']} ({state['valueTask']})")
+    printTitle(state['taskName'])
 
 
 def initSubtask(name, value):
     global state
     state["subtaskName"] = name
     state["valueSubtask"] = value
+    state["valueTask"] += state["valueSubtask"]
+
+
+def catchError(e):
+    if state["debug"]:
+        print(e)
+    subtaskFail()
 
 
 def subtaskSuccess():
@@ -121,6 +167,11 @@ def subtaskSuccess():
 def subtaskFail():
     global state
     printFail(state["subtaskName"])
+
+
+def closeTask():
+    state["scoreMax"] += state["valueTask"]
+    printTaskSummary()
 
 
 def printTaskSummary():

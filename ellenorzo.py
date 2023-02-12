@@ -2,180 +2,114 @@ import random
 import time
 from statistics import mean
 
-import py_corrector as pc
+import njit_corrector as nc
 
+with nc.exam():
 
-def task_1():
-    pc.initNextTask(5)
+    with nc.task():
 
-    pc.initSubtask("Helyes fájlnév", 1)
-    pc.assertCorrectFileName("01_feladat.py")
+        with nc.subtask("Helyes fájlnév", 1):
+            nc.assertCorrectFileName("01_feladat.py")
 
-    pc.initSubtask("Helyes eredmény", 2)
-    try:
-        pc.runFile("01_feladat.py")
-        pc.assertIntOut(220)
-    except:
-        pc.subtaskFail()
+        with nc.subtask("Helyes eredmény", 2):
+            nc.runFile("01_feladat.py")
+            nc.assertIntOut(220)
 
-    pc.initSubtask("Helyes eredmény módosított lista esetén", 2)
-    try:
-        code = pc.readFile("01_feladat.py")
-        originList = code.split('[')[1].split(']')[0]
-        randomItem = random.randint(0, 100)
-        newList = '10, 20, ' + str(randomItem)
-        code = code.replace(originList, newList)
-        pc.runCode(code)
-        pc.assertIntOut(30 + randomItem)
-    except Exception as e:
-        print(e)
-        pc.subtaskFail()
+        with nc.subtask("Helyes eredmény módosított lista esetén", 2):
+            code = nc.readFile("01_feladat.py")
+            originList = code.split('[')[1].split(']')[0]
+            randomItem = random.randint(0, 100)
+            newList = '10, 20, ' + str(randomItem)
+            code = code.replace(originList, newList)
+            nc.runCode(code)
+            nc.assertIntOut(30 + randomItem)
 
+    with nc.task():
 
-def task_2():
-    pc.initNextTask(5)
+        with nc.subtask("Helyes fájlnév", 1):
+            nc.assertCorrectFileName("01_feladat.py")
 
-    pc.initSubtask("Helyes fájlnév", 1)
-    pc.assertCorrectFileName("01_feladat.py")
+        with nc.subtask("Helyes eredmény", 4):
+            code = nc.readFile("02_feladat.py")
+            testResults = random.sample(range(1, 5), 3)
+            nc.runCode(code, testResults)
+            nc.assertFloatOut(mean(testResults))
 
-    pc.initSubtask("Helyes eredmény", 4)
-    try:
-        code = pc.readFile("02_feladat.py")
-        testResults = random.sample(range(1, 5), 3)
-        pc.runCode(code, testResults)
-        pc.assertFloatOut(mean(testResults))
-    except Exception as e:
-        print(e)
-        pc.subtaskFail()
+    with nc.task():
 
+        with nc.subtask("Helyes fájlnév", 1):
+            nc.assertCorrectFileName("03_feladat.py")
 
-def task_3():
-    pc.initNextTask(6)
+        with nc.subtask("nevek lista létrehozása", 1):
+            code = nc.readFile("03_feladat.py")
+            code += '\nif "nevek" in locals():'
+            code += '\n   print(nevek == ["Alice", "Bob", "Charlie", "David", "Emilio"])\n'
+            nc.runCode(code)
+            nc.assertStringOut("True")
 
-    pc.initSubtask("Helyes fájlnév", 1)
-    pc.assertCorrectFileName("03_feladat.py")
+        with nc.subtask("David megtalálása", 2):
+            nc.runFile("03_feladat.py")
+            nc.assertStringOut("Benne van")
 
-    pc.initSubtask("nevek lista létrehozása", 1)
-    try:
-        code = pc.readFile("03_feladat.py")
-        code += '\nif "nevek" in locals():'
-        code += '\n   print(nevek == ["Alice", "Bob", "Charlie", "David", "Emilio"])\n'
-        pc.runCode(code)
-        pc.assertStringOut("True")
-    except:
-        pc.subtaskFail()
+        with nc.subtask("Gyors futásidő", 2):
+            code = nc.readFile("03_feladat.py")
+            lines = code.split('\n')
+            lines[0] = 'nevek = ["David"] + ["John"] * 999999'
+            code = '\n'.join(lines)
+            start = time.time()
+            nc.runCode(code)
+            end = time.time()
+            if (end - start) > 0.1:
+                nc.subtaskFail()
+            else:
+                nc.subtaskSuccess()
 
-    pc.initSubtask("David megtalálása", 2)
-    try:
-        pc.runFile("03_feladat.py")
-        pc.assertStringOut("Benne van")
-    except:
-        pc.subtaskFail()
+    with nc.task():
 
-    pc.initSubtask("Gyors futásidő", 2)
-    try:
-        code = pc.readFile("03_feladat.py")
-        lines = code.split('\n')
-        lines[0] = 'nevek = ["David"] + ["John"] * 999999'
-        code = '\n'.join(lines)
-        start = time.time()
-        pc.runCode(code)
-        end = time.time()
-        if (end - start) > 0.1:
-            pc.subtaskFail()
-        else:
-            pc.subtaskSuccess()
-    except:
-        pc.subtaskFail()
+        with nc.subtask("Helyes fájlnév", 1):
+            nc.assertCorrectFileName("04_feladat.py")
 
+        with nc.subtask("Törpe megtalálása", 2):
+            nc.runFile("04_feladat.py", "Kuka")
+            nc.assertStringOut("Talált!")
 
-def task_4():
-    pc.initNextTask(5)
+        with nc.subtask("Rossz találat jelzése", 2):
+            nc.runFile("04_feladat.py", "Huba")
+            nc.assertStringOut("Nem talált!")
 
-    pc.initSubtask("Helyes fájlnév", 1)
-    pc.assertCorrectFileName("04_feladat.py")
+    with nc.task():
 
-    pc.initSubtask("Törpe megtalálása", 2)
-    try:
-        pc.runFile("04_feladat.py", "Kuka")
-        pc.assertStringOut("Talált!")
-    except:
-        pc.subtaskFail()
+        with nc.subtask("Helyes fájlnév", 1):
+            nc.assertCorrectFileName("05_feladat.py")
 
-    pc.initSubtask("Rossz találat jelzése", 2)
-    try:
-        pc.runFile("04_feladat.py", "Huba")
-        pc.assertStringOut("Nem talált!")
-    except:
-        pc.subtaskFail()
+        with nc.subtask("mylist lista létrehozása", 1):
+            code = nc.readFile("05_feladat.py")
+            code += '\nif "mylist" in locals():'
+            code += '\n   print("mylist exist")\n'
+            nc.runCode(code)
+            nc.assertStringOut("mylist exist")
 
+        with nc.subtask("Helyes végrehajtás", 4):
+            code = nc.readFile("05_feladat.py")
+            part1 = code.split("mylist")
+            part2 = part1[1].split("[")
+            listValues = part2[1].split("]")[0]
+            code = code.replace(listValues, "2, 6")
+            nc.runCode(code)
+            result = int(nc.readLastLineFromOut())
+            nc.assertValues(result == 6 or result == 12, True)
 
-def task_5():
-    pc.initNextTask(6)
+    with nc.task():
 
-    pc.initSubtask("Helyes fájlnév", 1)
-    pc.assertCorrectFileName("05_feladat.py")
+        with nc.subtask("Helyes fájlnév", 1):
+            nc.assertCorrectFileName("06_feladat.py")
 
-    pc.initSubtask("mylist lista létrehozása", 1)
-    try:
-        code = pc.readFile("05_feladat.py")
-        code += '\nif "mylist" in locals():'
-        code += '\n   print("mylist exist")\n'
-        pc.runCode(code)
-        pc.assertStringOut("mylist exist")
-    except:
-        pc.subtaskFail()
+        with nc.subtask("Helyes eredmény - Rekord", 3):
+            nc.runFile("06_feladat.py", 100)
+            fullout = nc.state["out"]
+            nc.assertValues("Rekord!" in fullout, True)
 
-    pc.initSubtask("Helyes végrehajtás", 4)
-    try:
-        code = pc.readFile("05_feladat.py")
-        part1 = code.split("mylist")
-        part2 = part1[1].split("[")
-        listValues = part2[1].split("]")[0]
-        code = code.replace(listValues, "2, 6")
-        pc.runCode(code)
-        result = int(pc.readLastLineFromOut())
-        pc.assertValues(result == 6 or result == 12, True)
-    except:
-        pc.subtaskFail()
-
-
-def task_6():
-    pc.initNextTask(8)
-
-    pc.initSubtask("Helyes fájlnév", 1)
-    pc.assertCorrectFileName("06_feladat.py")
-
-    pc.initSubtask("Helyes eredmény - Rekord", 3)
-    try:
-        pc.runFile("06_feladat.py", 100)
-        fullout = pc.state["out"]
-        pc.assertValues("Rekord!" in fullout, True)
-    except:
-        pc.subtaskFail()
-
-    pc.initSubtask("Helyes eredmény - Már volt", 4)
-    try:
-        pc.runFile("06_feladat.py", 42)
-        fullout = pc.state["out"]
-        pc.assertValues("Már volt" in fullout, True)
-    except:
-        pc.subtaskFail()
-
-
-task_1()
-pc.printTaskSummary()
-task_2()
-pc.printTaskSummary()
-task_3()
-pc.printTaskSummary()
-task_4()
-pc.printTaskSummary()
-task_5()
-pc.printTaskSummary()
-task_6()
-pc.printTaskSummary()
-
-
-# Summary
-pc.printTitle("Összegzés:")
+        with nc.subtask("Helyes eredmény - Már volt", 4):
+            nc.runFile("06_feladat.py", 42)
+            fullout = nc.state["out"]
+            nc.assertValues("Már volt" in fullout, True)
