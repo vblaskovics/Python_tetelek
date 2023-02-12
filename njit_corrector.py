@@ -10,6 +10,7 @@ state = None
 
 @contextmanager
 def exam():
+    global state
     try:
         state = {
             "out": "",
@@ -20,7 +21,8 @@ def exam():
             "valueSubtask": 0,
             "scoreTask": 0,
             "score": 0,
-            "scoreMax": 0
+            "scoreMax": 0,
+            "debug": True
         }
         yield
 
@@ -32,9 +34,9 @@ def exam():
 
 
 @contextmanager
-def task():
+def task(name=""):
     try:
-        initNextTask()
+        initNextTask(name)
         yield
 
     except Exception as e:
@@ -52,21 +54,6 @@ def subtask(name, value):
 
     except Exception as e:
         catchError(e)
-
-
-class PyCorrector:
-    def __init__(self):
-        self.state = {
-            "out": "",
-            "taskName": "",
-            "taskCount": 0,
-            "subtaskName": "",
-            "valueTask": 0,
-            "valueSubtask": 0,
-            "scoreTask": 0,
-            "score": 0,
-            "scoreMax": 0
-        }
 
 
 def readFile(fname):
@@ -96,7 +83,7 @@ def runCode(code, input=None):
 def runFile(fname, input=None):
     code = readFile(fname)
     if code:
-        runCode(code, input)
+        return runCode(code, input)
 
 
 def printTitle(text):
@@ -121,24 +108,13 @@ def printSummary():
     print(f"Eredmény:{int((state['score'] / state['scoreMax']) * 100)}%")
 
 
-state = {
-    "debug": False,
-    "out": "",
-    "taskName": "",
-    "taskCount": 0,
-    "subtaskName": "",
-    "valueTask": 0,
-    "valueSubtask": 0,
-    "scoreTask": 0,
-    "score": 0,
-    "scoreMax": 0
-}
-
-
-def initNextTask():
+def initNextTask(name=""):
     global state
     state["taskCount"] = int(state["taskCount"] + 1)
-    state["taskName"] = f'{state["taskCount"]}. Feladat'
+    if name:
+        state["taskName"] = name
+    else:
+        state["taskName"] = f'{state["taskCount"]}. Feladat'
     state["valueTask"] = 0
     state["scoreTask"] = 0
     printTitle(state['taskName'])
@@ -191,25 +167,33 @@ def assertValues(v1, v2):
         subtaskFail()
 
 
-# Check the last number in the out to be equal with the given value
-def assertIntOut(value):
+def assertValueLesserThan(value1, value2):
+    if (value1 < value2):
+        subtaskSuccess()
+    else:
+        subtaskFail()
+
+
+def assertValueGreaterThan(value1, value2):
+    if (value1 > value2):
+        subtaskSuccess()
+    else:
+        subtaskFail()
+
+
+def assertLastLine(value):
     lastLine = readLastLineFromOut()
-    assertValues(int(lastLine), value)
+    if isinstance(value, int):
+        assertValues(int(lastLine), value)
+    elif isinstance(value, float):
+        assertValues(float(lastLine), value)
+    elif isinstance(value, bool):
+        assertValues(bool(lastLine), value)
+    else:
+        assertValues(lastLine, value)
 
 
-# Check the last float number in the out to be equal with the given value
-def assertFloatOut(value):
-    lastLine = readLastLineFromOut()
-    assertValues(float(lastLine), value)
-
-
-# Check the last line in the out to be equal with the given value
-def assertStringOut(value):
-    lastLine = readLastLineFromOut()
-    assertValues(lastLine, value)
-
-
-def assertCorrectFileName(fname):
+def assertFileName(fname):
     if (os.path.exists(fname)):
         subtaskSuccess()
     else:
